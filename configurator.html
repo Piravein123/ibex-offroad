@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IBEX FRSS Configurator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Same CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header class="navbar" id="navbar">
+    <div class="logo">IBEX FRSS</div>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#">Configurator</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- ===== CONFIGURATOR SECTION ===== -->
+<section class="section" style="margin-top:120px;">
+    <h2>FRSS Configurator</h2>
+
+    <div style="display:flex; gap:50px; flex-wrap:wrap;">
+
+        <!-- LEFT SIDE OPTIONS -->
+        <div style="flex:1; min-width:300px;">
+
+            <h3>1. Terrain Mode</h3>
+            <div>
+                <label><input type="radio" name="terrain" value="Forest"> Forest</label><br>
+                <label><input type="radio" name="terrain" value="Rock"> Rock</label><br>
+                <label><input type="radio" name="terrain" value="Sand"> Sand</label><br>
+                <label><input type="radio" name="terrain" value="Snow"> Snow</label>
+            </div>
+
+            <br>
+
+            <h3>2. Rear System</h3>
+            <div>
+                <label><input type="radio" name="rear" value="Flat Bed"> Flat Bed</label><br>
+                <label><input type="radio" name="rear" value="Hitch Mount"> Hitch Mount</label><br>
+                <label><input type="radio" name="rear" value="Snap-Fit Platform"> Snap-Fit Platform</label>
+            </div>
+
+            <br>
+
+            <h3>3. Add-On Modules</h3>
+            <div>
+                <label><input type="checkbox" value="Tool Mount" class="addon"> Tool Mount</label><br>
+                <label><input type="checkbox" value="Snow Plow" class="addon"> Snow Plow</label><br>
+                <label><input type="checkbox" value="Cargo Rack" class="addon"> Cargo Rack</label>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE VEHICLE PREVIEW -->
+<div style="flex:1; min-width:300px; display:flex; flex-direction:column; align-items:center;">
+
+    <h3>Vehicle Preview</h3>
+
+    <!-- Vehicle wrapper -->
+    <div class="vehicle-container-wrapper">
+        <div id="vehicleContainer" class="vehicle-container">
+            <img src="assets/vehicle-layers/base.png" class="vehicle-layer" id="layer-base">
+            <img src="assets/vehicle-layers/rear-flat.png" class="vehicle-layer hidden" id="layer-rear-flat">
+            <img src="assets/vehicle-layers/rear-hitch.png" class="vehicle-layer hidden" id="layer-rear-hitch">
+            <img src="assets/vehicle-layers/rear-snap.png" class="vehicle-layer hidden" id="layer-rear-snap">
+            <img src="assets/vehicle-layers/addon-tool.png" class="vehicle-layer hidden" id="layer-addon-tool">
+            <img src="assets/vehicle-layers/addon-snowplow.png" class="vehicle-layer hidden" id="layer-addon-snowplow">
+            <img src="assets/vehicle-layers/addon-cargo.png" class="vehicle-layer hidden" id="layer-addon-cargo">
+        </div>
+    </div>
+
+    <!-- Configuration summary OUTSIDE of wrapper -->
+    <div id="summary-container" style="width:100%; margin-top:20px;">
+        <h3>Configuration Summary</h3>
+        <div id="summary" style="
+            padding:15px;
+            min-height:120px;
+            text-align:left;
+        ">
+            No selections yet.
+        </div>
+    </div>
+
+</div>
+
+
+ </div>
+
+    </div>
+</section>
+
+<script src="js/animations.js"></script>
+
+<script>
+let selectedTerrain = null;
+let selectedRear = null;
+let selectedAddOns = [];
+
+const summaryBox = document.getElementById("summary");
+
+// Utility
+function hideAllRear(){
+    document.getElementById("layer-rear-flat").classList.add("hidden");
+    document.getElementById("layer-rear-hitch").classList.add("hidden");
+    document.getElementById("layer-rear-snap").classList.add("hidden");
+}
+
+function updateRearLayer(){
+    hideAllRear();
+    if(selectedRear === "Flat Bed"){
+        document.getElementById("layer-rear-flat").classList.remove("hidden");
+    }
+    if(selectedRear === "Hitch Mount"){
+        document.getElementById("layer-rear-hitch").classList.remove("hidden");
+    }
+    if(selectedRear === "Snap-Fit Platform"){
+        document.getElementById("layer-rear-snap").classList.remove("hidden");
+    }
+}
+
+function updateAddOnLayers(){
+    const addons = {
+        "Tool Mount": "layer-addon-tool",
+        "Snow Plow": "layer-addon-snowplow",
+        "Cargo Rack": "layer-addon-cargo"
+    };
+
+    // Hide all
+    Object.values(addons).forEach(id => {
+        document.getElementById(id).classList.add("hidden");
+    });
+
+    // Show selected
+    selectedAddOns.forEach(addon => {
+        const layerId = addons[addon];
+        if(layerId){
+            document.getElementById(layerId).classList.remove("hidden");
+        }
+    });
+}
+
+function updateSummary(){
+    summaryBox.innerHTML = `
+        <strong>Platform:</strong> IBEX FRSS<br>
+        <strong>Terrain:</strong> ${selectedTerrain || "Not selected"}<br>
+        <strong>Rear System:</strong> ${selectedRear || "Not selected"}<br>
+        <strong>Add-Ons:</strong> ${selectedAddOns.length > 0 ? selectedAddOns.join(", ") : "None"}
+    `;
+}
+
+// Terrain
+document.querySelectorAll('input[name="terrain"]').forEach(radio => {
+    radio.addEventListener("change", function() {
+        selectedTerrain = this.value;
+        updateSummary();
+    });
+});
+
+// Rear
+document.querySelectorAll('input[name="rear"]').forEach(radio => {
+    radio.addEventListener("change", function() {
+        selectedRear = this.value;
+        updateRearLayer();
+        updateSummary();
+    });
+});
+
+// Add-ons
+document.querySelectorAll('.addon').forEach(box => {
+    box.addEventListener("change", function() {
+        if(this.checked){
+            selectedAddOns.push(this.value);
+        } else {
+            selectedAddOns = selectedAddOns.filter(item => item !== this.value);
+        }
+        updateAddOnLayers();
+        updateSummary();
+    });
+});
+</script>
+
+</body>
+</html>
